@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  </head>
+  <body>
+    <section>
+      <fieldset name="countries">
+      <legend>Countries</legend>
+      <label for="country">
+        Country
+        <input type="radio" value="fr" name="country" id="fr"><img src="https://www.countryflags.io/FR/flat/16.png"/></input>
+        <input type="radio" value="de" name="country" id="de"><img src="https://www.countryflags.io/DE/flat/16.png"/></input>
+        <input type="radio" value="uk" name="country" id="uk"><img src="https://www.countryflags.io/GB/flat/16.png"/></input>
+      </label>
+      </fieldset>
+    </section>
+    <section>
+      <h2>Data</h2>
+      <fieldset>
+        <legend>Public Sector</legend>
+        <label for="taxes">
+          Taxes
+          <input type="text" name="taxes" id="taxes" />
+        </label>
+        <label for="expenses">
+          Expenses
+          <input name="expenses" id="expenses" type="text" />
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Private Sector</legend>
+        <label for="consumption">
+          Consumption
+          <input name="consumption" id="consumption" type="text" />
+        </label>
+        <label for="savings">
+        Savings
+        <input name="savings" id="savings" type="text" />
+        </label>
+        <label for="investments">
+          Investments
+          <input name="investments" id="investments" type="text" />
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>External Sector</legend>
+        <label for="exports">
+        Exports
+        <input name="exports" id="exports" type="text" disabled />
+        </label>
+        <label for="imports">
+          Imports
+          <input name="imports" id="imports" type="text" disabled />
+        </label>
+        <label for="fni">
+          Financial flows
+          <input name="fni" id="fni" type="text" />
+        </label>
+      </fieldset>
+    </section>
+    <fieldset>
+      <legend>Aggregate</legend>
+      <label for="GDP">
+        GDP
+        <input name="GDP" id="gdp" type="text" />
+      </label>
+      <label for="GNI">
+        GNI
+        <input name="GNI" id="gni" type="text" />
+      </label>
+    </fieldset>
+  </body>
+  <script src="index.js"></script>
+</html>
