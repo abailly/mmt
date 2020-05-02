@@ -77,20 +77,22 @@
 }
 
 */
-const tradeUrl = "https://comtrade.un.org/api/get?r=276,251,826\&p=0\&px=HS\&ps=2018\&cc=TOTAL\&fmt=json\&rg=1,2";
+const tradeUrl = "https://comtrade.un.org/api/get?r=276,251,826,842\&p=0\&px=HS\&ps=2018\&cc=TOTAL\&fmt=json\&rg=1,2";
 
-const tradeData = {fr: {imports: 0,
+const initialData = {fr: {imports: 0,
                         exports:0},
-                   de: {imports: 0,
-                        exports:0},
-                   uk: {imports: 0,
-                        exports:0},
-                  };
+                     de: {imports: 0,
+                          exports:0},
+                     uk: {imports: 0,
+                          exports:0},
+                     us: {imports: 0,
+                          exports:0},
+                    };
 
-/* Populate global `tradeData` object with content from the
+/* Populate global `initialData` object with content from the
    raw data
 */
-function populateTradeData(rawData, tradeData) {
+function populateTradeData(rawData, initialData) {
     rawData.dataset.forEach((rawTrade) => {
         var country = null;
         switch(rawTrade.rtCode) {
@@ -103,15 +105,18 @@ function populateTradeData(rawData, tradeData) {
         case 826: // United Kingdom
             country = "uk";
             break;
+        case 842: // USA
+            country = "us";
+            break;
         default:
             // do nothing
         }
 
         // value is in billions (of USD?)
         if(rawTrade.rgCode == 1) {
-            tradeData[country].imports = rawTrade.TradeValue / 1000000000;
+            initialData[country].imports = rawTrade.TradeValue / 1000000000;
         } else {
-            tradeData[country].exports = rawTrade.TradeValue / 1000000000;
+            initialData[country].exports = rawTrade.TradeValue / 1000000000;
         }
     });
 }
@@ -122,85 +127,7 @@ function initialiseTradeData() {
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
             try {
-                populateTradeData(JSON.parse(xhr.responseText), tradeData);
-            } catch(e) {
-                // JSON.parse can throw a SyntaxError
-                if (e instanceof SyntaxError) {
-                    alert("invalid JSON payload" + xhr.responseText);
-                }
-                throw e;
-            }
-        } else {
-            alert('Request failed.  Returned status of ' + xhr.status);
-        }
-    };
-    xhr.send();
-};
-
-
-/*
- from http://api.worldbank.org/v2/country/DEU/indicator/NY.GDP.MKTP.CD?format=json\&date=2018
-
-[
-  {
-    "page": 1,
-    "pages": 1,
-    "per_page": 50,
-    "total": 1,
-    "sourceid": "2",
-    "lastupdated": "2020-04-09"
-  },
-  [
-    {
-      "indicator": {
-        "id": "NY.GDP.MKTP.CD",
-        "value": "GDP (current US$)"
-      },
-      "country": {
-        "id": "DE",
-        "value": "Germany"
-      },
-      "countryiso3code": "DEU",
-      "date": "2018",
-      "value": 3947620162502.96,
-      "unit": "",
-      "obs_status": "",
-      "decimal": 0
-    }
-  ]
-]
-*/
-const gdpURL = "http://api.worldbank.org/v2/country/DEU;FRA;GBR/indicator/NY.GDP.MKTP.CD?format=json&date=2018";
-
-function populateGDPData(rawData, tradeData) {
-    rawData[1].forEach((rawGdp) => {
-        var country = null;
-        switch(rawGdp.countryiso3code) {
-        case "DEU": // Germany
-            country = "de";
-            break;
-        case "FRA": // France
-            country = "fr";
-            break;
-        case "GBR": // United Kingdom
-            country = "uk";
-            break;
-        default:
-            // do nothing
-        }
-
-        // value is in billions (of USD?)
-        tradeData[country].gdp = rawGdp.value / 1000000000;
-    });
-}
-
-function initialiseGDPData() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', gdpURL);
-    xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-                populateGDPData(JSON.parse(xhr.responseText), tradeData);
+                populateTradeData(JSON.parse(xhr.responseText), initialData);
             } catch(e) {
                 // JSON.parse can throw a SyntaxError
                 if (e instanceof SyntaxError) {
@@ -251,12 +178,12 @@ function updateModel(model, keys) {
 }
 
 function updateModelData(model, country) {
-    const trade = tradeData[country];
-    model.imports = trade.imports;
-    model.exports = trade.exports;
-    model.gdp = trade.gdp;
+    const trade = initialData[country];
+    for(var k of Object.keys(trade)) {
+        model[k] = trade[k];
+    }
 
-    return updateModel(model, ["imports", "exports", "gdp"]);
+    return updateModel(model, Object.keys(trade));
 }
 
 function clone(obj) {
@@ -294,7 +221,9 @@ updateView(model);
 
 // initialise trade data from external site
 initialiseTradeData();
-initialiseGDPData();
+
+// load data from OECD
+const oecdData = oecd().initialiseOECDData();
 
 // handle changes in value for textual inputs
 for(var k of Object.keys(model)) {
@@ -308,8 +237,10 @@ function setCountryChangeHandler() {
     var prev = null; // selected radio
     for (var i = 0; i < rad.length; i++) {
         rad[i].addEventListener('click', function() {
+            console.log(this);
             if (this !== prev) {
                 prev = this;
+                oecdData.updateData(initialData[prev.value], prev.value);
                 model = updateModelData(model, prev.value);
                 updateView(model);
             }
