@@ -27,7 +27,7 @@ function listOfCountries(){
 }
 
 /* create a new object containing data for the given countries */
-function oecd() {
+export default function oecd() {
     const obj = {};
     function initialiseOECDData() {
         const xhr = new XMLHttpRequest();

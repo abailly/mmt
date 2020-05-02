@@ -1,4 +1,4 @@
-import {oecd} from './oecd.js';
+import oecd from './oecd.js';
 
 /*
   From https://comtrade.un.org/data/doc/api/#DataAvailabilityRequests
