@@ -1,3 +1,5 @@
+import {oecd} from './oecd.js';
+
 /*
   From https://comtrade.un.org/data/doc/api/#DataAvailabilityRequests
 
@@ -145,8 +147,11 @@ function initialiseTradeData() {
 
 var model = { taxes: 0,
               expenses:0,
+              deficit:0,
+              deficitRate:0,
               consumption:0,
               savings:0,
+              savingsRate:0,
               investments:0,
               exports:0,
               imports:0,
@@ -157,8 +162,11 @@ var model = { taxes: 0,
 var formulas =
     { taxes: (model) => (model.gni - model.consumption - model.savings - model.fni),
       expenses: (model) => (model.gdp - model.consumption - model.investments - model.exports + model.imports),
+      deficit: (model) => (model.expenses - model.taxes),
+      deficitRate: (model) => (model.taxes != 0 ? (model.deficit / model.taxes) * 100 : 0),
       consumption: (model) => (model.gdp - model.investments - model.expenses - model.exports + model.imports),
       savings: (model) => (model.gni - model.consumption - model.taxes - model.fni),
+      savingsRate: (model) => (model.consumption != 0 ? (model.savings / model.consumption) * 100 : 0),
       investments: (model) => (model.gdp - model.consumption - model.expenses - model.exports + model.imports),
       exports: (model) => (model.gdp - model.consumption - model.investments - model.expenses + model.imports),
       imports: (model) => (model.consumption + model.investments + model.expenses + model.exports - model.gdp),
